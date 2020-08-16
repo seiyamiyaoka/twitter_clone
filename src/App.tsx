@@ -8,29 +8,30 @@ import { AuthProvider } from './actions/authenticate'
 import Home from './pages/Home'
 import SignUp from './pages/SignUp'
 import TweetForm from './pages/TweetForm'
+import Tweets from './pages/Tweets'
 import './App.css';
 
 export default function App() {
   return (
     <AuthProvider>
-        <Router>
-          <Switch>
-            <Route exact path="/">
-              <Home title="hello"/>
-            </Route>
-            <Route exact path="/signup">
-              <SignUp />
-            </Route>
-            <Route path="/tweets"
-                   render={( { match: { url } } ) => (     
-              <>
-                <Route path={`${url}/`} component={Users} exact />
-                <Route path={`${url}/new`} component={TweetForm} />
-              </>
-            )}
-            />
-          </Switch>
-        </Router>
+      <Router>
+        <Switch>
+          <Route exact path="/">
+            <Home title="hello"/>
+          </Route>
+          <Route exact path="/signup">
+            <SignUp />
+          </Route>
+          <Route path="/tweets"
+                  render={( { match: { url } } ) => (     
+            <>
+              <Route path={`${url}/`} component={Tweets} exact />
+              <Route path={`${url}/new`} component={TweetForm} />
+            </>
+          )}
+          />
+        </Switch>
+      </Router>
     </AuthProvider>
   );
 }

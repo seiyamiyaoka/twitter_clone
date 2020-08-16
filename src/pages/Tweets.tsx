@@ -1,13 +1,16 @@
 import {
   useContext,
-  useState
+  useState,
+  useEffect
 } from 'react'
 import { AuthContext } from '../actions/authenticate'
-import { saveMessage } from '../actions/tweet'
+import { saveMessage, loadMessages, documentType } from '../actions/tweet'
 import TwitterLogo from "../assets/twitter.svg"
+import Plus from "../assets/plus.svg"
 import Arow from "../assets/left.svg"
 import { Container } from "../components/Container"
 import { TitleContainer } from "../components/TitleContainer"
+import TweetCard from "../components/TweetCard"
 import { Title } from "../components/Title"
 
 import styled from 'styled-components'
@@ -21,61 +24,52 @@ type ContentProps = {
   title: string
 }
 
-const TweetForm: React.FC<{}> = () => {
+const Tweets: React.FC<{}> = () => {
   const {
     currentUser
   } = useContext(AuthContext)
 
-  const [text, setText] = useState("")
+  const [messages, setMessages] = useState<documentType[]>([])
 
-  const clickHandle = () => {
-    saveMessage(text)
-  }
+  useEffect(
+    () => {
+      loadMessages().then((messages) => {
+        const fetchedMessages = messages.docs.map((d) => d.data())
+        setMessages(fetchedMessages)
+      })
+    },
+    [],
+  );
+
+  console.log(currentUser)
   return (
-    <>
+    <MainContainer>
       <Container>
         <FirstContainer>
-          <LogoArea
-            mb="4%"
-            bb="1px solid white"
-            jc="space-between"
-            ai="center"
-          >
-            <Logo height="1.25rem"
-                  mb="4%"
-                  src={ Arow }
-                  onClick={() => window.location.replace("/tweets")}
-            />
-            <Button to="/tweets"
-                    BuckColor="#20A1F1"
-                    fontColor="white"
-                    onClick={clickHandle}
-            >
-              ツイートする
-            </Button>
-          </LogoArea>
-          <LogoArea ai="start">
-            <Logo height="2.25rem" src={ currentUser?.photoURL || TwitterLogo} />
-            <TweetArea
-              name=""
-              id=""
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              cols={30}
-              rows={2}
-              placeholder="いまどうしてる？"
-              />
+          <LogoArea ai="start" bb="1px solid white">
+            <Logo height="2.25rem" mb="4%" src={ currentUser?.photoURL || TwitterLogo} />
+            <HomeTitle size="1.2rem">ホーム</HomeTitle>
           </LogoArea>
           <StartService height="110px" padding="2%">
-            
+            {
+              messages.map(message => (
+                <TweetCard message={message} />
+              ))
+            }
           </StartService>
         </FirstContainer>
-        <StartService height="200px" padding="0%">
-        </StartService>
+        <PlusLogo onClick={() => window.location.replace("/tweets/new")}
+                  height="3.25rem"
+                  mb="4%"
+                  src={ Plus } />  
       </Container>
-    </>
+    </MainContainer>
   )
 }
+
+const MainContainer = styled.div`
+  height: 500px;
+`
 
 const FirstContainer = styled.div`
   padding: 5%;
@@ -85,6 +79,13 @@ const Logo = styled.img<{height: string, mb?: string}>`
   margin-bottom: ${props => props.mb ? props.mb : "0"};
 `
 
+const PlusLogo = styled(Logo)`
+    position: fixed;
+    right: 50px;
+    top: 300px;
+    background: white
+`
+
 const LogoArea = styled.div<{mb?: string, bb?: string, jc?: string, ai?: string}>`
   width: 100%;
   display: flex;
@@ -92,6 +93,7 @@ const LogoArea = styled.div<{mb?: string, bb?: string, jc?: string, ai?: string}
   margin-bottom: ${props => props.mb ? props.mb : "0"};
   border-bottom: ${props => props.bb ? props.bb : ""};
   justify-content: ${props => props.jc ? props.jc : ""}
+  border-bottom: 1px solid white
 `
 
 const TweetArea = styled.textarea`
@@ -102,6 +104,7 @@ const TweetArea = styled.textarea`
 `
 
 const HomeTitle = styled(Title)`
+  line-height: 37px;
   margin-left: 6%;
 `
 
@@ -141,4 +144,4 @@ const Introduction = styled.p<{size: string}>`
   font-weight: bold;
 `
 
-export default TweetForm
+export default Tweets
